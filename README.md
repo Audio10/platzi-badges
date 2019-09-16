@@ -57,3 +57,80 @@ const container = document.getElementById('app')
 ReactDom.render(element, container)
 ```
 
+# Componentes.
+
+Para crear un componente creamos una carpeta **Components** dentro de **src** donde vivirán nuestros componentes.
+
+Un componente es representado por una clase es decir debe ser un **class** que herede de **React.Component**, donde la única restricción es que esta clase debe ejecutar el método **render()** que viene de **react** . 
+
+Dentro del método render retornamos nuestro componente con formato JSX.
+
+```
+import React from 'react'
+
+class Badge extends React.Component{
+  render() {
+    return(
+      <h1>Badge</h1>
+    )
+  }
+}
+
+export default Badge
+```
+
+Para insertar nuestro componente este se inyecta dentro del **app** desde el **index.js** de esta forma.
+
+```
+import React from 'react'
+import ReactDom from 'react-dom'
+
+import Bagde from './components/Badge'
+
+const container = document.getElementById('app')
+
+ReactDom.render(<Bagde />, container)
+```
+
+# Imagenes
+
+Las imagenes se guardan en una carpeta dentro de src y se importan de la siguiente forma. Donde se ocupa el nombre como una expresión.
+
+```jsx
+import confLogo from '../images/badge-header.svg'
+
+		<div>
+          <img src={confLogo} alt="Logo de la conferencia"/>
+        </div>
+```
+
+# CSS
+
+El CSS es importando sin asignación en el componente en el cual se va a ocupar.
+
+Como todos los componentes son **class** para especificar una clase de CSS se ocupa el atributo className.
+
+```
+import './styles/Badge.css'
+
+<div className="badge">
+        <div>
+          <img src={confLogo} alt="Logo de la conferencia"/>
+        </div>
+</div>
+```
+
+## Instalar bootstrap
+
+Primero se debe instalar con el manejador de paquetes.
+
+```
+npm install bootstrap
+```
+
+Este se importa en el **index.js**
+
+```
+import 'bootstrap/dist/css/bootstrap.css'
+```
+
