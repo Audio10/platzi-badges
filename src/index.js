@@ -7,8 +7,12 @@ import 'bootstrap/dist/css/bootstrap.css'
 import './global.css'
 
 // COMPONENTES
-import Bagde from './components/Badge'
+// import BagdeNew from './pages/BadgeNew'
+import Badges from './pages/Badges';
 
 const container = document.getElementById('app')
 
-ReactDom.render(<Bagde />, container)
+ReactDom.render(
+<Badges 
+    
+/>, container)

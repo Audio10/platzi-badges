@@ -134,3 +134,248 @@ Este se importa en el **index.js**
 import 'bootstrap/dist/css/bootstrap.css'
 ```
 
+# Props
+
+Los Props o propiedades son los llamados atributos en Html, pero en este caso de nuestros componentes.
+
+Éstos se especifican dentro de la etiqueta del componente donde se invoca el componente en este caso en el index.js.
+
+```jsx
+ReactDom.render(<Bagde firstName="Lilly" lastName="Kaufman" />, container)
+```
+
+  
+
+Y dentro del componente estos son llamados dentro de corchetes.
+
+```jsx
+<h1>{this.props.firstName} <br/> {this.props.lastName}</h1>
+```
+
+# Pages
+
+Las paginas siguen siendo componentes, pero en este caso al decir page nos referimos a **un componente que tiene dentro mas componentes.**
+
+Este tipo de componentes van dentro de **src** en una carpeta llamada **pages**
+
+# Enlazar eventos
+
+Los eventos se declaran dentro del componente con la notacion **handleEvent**. 
+
+Y son llamados desde las etiquetas como evaluaciones del propio elemento.
+
+```jsx
+onSubmit={this.handleSubmit}
+onClick={this.handleClick}
+onChange={this.handleChange}
+```
+
+
+
+```jsx
+export class BadgeForm extends Component {
+
+  handleChange = e => {
+    console.log( {
+      name : e.target.name,
+      value : e.target.value
+    })
+  }
+
+  handleClick = e =>{
+    console.log('Button was clicked')
+  }
+
+  handleSubmit = e =>{
+    e.preventDefault()
+    console.log('button submit')
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>New attendant</h1>
+
+        <form onSubmit={this.handleSubmit}>
+          <div className="form-group">
+            <label>First Name</label>
+            <input onChange={this.handleChange} className="form-control" type="text" name="firstName"/>
+          </div>
+
+          <button type="submit" onClick={this.handleClick} className="btn btn-primary">Save</button>
+        </form>
+      </div>
+    );
+  }
+}
+```
+
+# Manejo de estado.
+
+Principalmente esta característica permite manejar la información que guardan los elementos de nuestro componente.
+
+Esta caracteristica es muy importante por que por cada input se guarda su valor en el mismo input y mas aparte este valor es guardado en el state es decir doble esfuerzo, lo cual no es algo optimo para el desarrollo de una aplicación ya que es preferible tener un solo origen de datos.
+
+Esta caracteristica es activada dentro del metodo handleChange ya que este es el encargado de escuchar cuando se cambia algo dentro de un campo.
+
+Donde se asigna el valor del State mediante la instrucción this.setState() y donde [**e.target.name**] especifica que por cada campo que escuche **e** tomara su nombre y asignara el valor que contiene por defecto si es controlado.
+
+```jsx
+  handleChange = e => {
+    // console.log( {
+      // name : e.target.name,
+      // value : e.target.value
+    // })
+
+    this.setState({
+      [e.target.name]: e.target.value,
+    })
+  }
+```
+
+Despues dentro de los atributos de los elementos debemos especificar que los datos de este seran tomados del estado del elemento.
+
+```jsx
+<div className="form-group">
+            <label>First Name</label>
+            <input 
+              onChange={this.handleChange} 
+              className="form-control" 
+              type="text" 
+              name="firstName"
+              value= {this.state.firstName}
+              />
+          </div>
+```
+
+Para asegurarnos que el estado esta controlado se genera un objeto state que especifica los valores por defecto de los campos que estaran en el.
+
+```
+state = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    jobTitle: "",
+    twitter: ""
+
+  }
+```
+
+# Levantar el estado
+
+Se refiere a poner el State en una localización donde se le puedan pasar como props los datos a los componentes.
+
+Y se pone al nivel que tu deseas compartir en este caso a nivel de la pagina.
+
+Para levantar el estado el método onChange del componente no sera necesario ya que este metodo debe estar dentro de la page porque esta misma lo va a manejar.
+
+Por lo cual se genera un state con los datos del formulario en este caso denominado **form**. Y se crea el metodo que se llamara dentro del onChange del componente el cual se va a enviar como una prop al componente para compartir el state. 
+
+Cabe resaltar que cuando se llama al metodo handleChange el setState debe guardar el estado anterior y sobre escribir lo que se cambio ya que si se graba directamente lo que esta en el target se van a eliminar los valores que ya tenia guardados antes. Es decir copias lo que tenias antes en state y si haces un cambio este se vuelve a asignar.
+
+```jsx
+state = {
+    form: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      twitter: "",
+      jobTitle: "",
+    }
+  }
+
+handleChange = e => {
+
+    this.setState({
+      form: {
+        #Copia todo el objeto que estaba antes
+        ... this.state.form,
+        # Y reasigna si es que el objeto e escucha que se cambia alguna propiedad.
+        [e.target.name] : e.target.value,
+      }
+    })
+  }
+
+
+#Componente generado que por medio del metodo onChange especifica el metodo que recibira los datos y los guardara en el estado de la page, de igual forma se manda por medio de las props el formValues que es la propiedad que asignara los datos del estado al BadgeForm.
+<BadgeForm onChange={this.handleChange} formValues={this.state.form}/>
+```
+
+Mientras tanto el badgeForm pierde el state ya que este se va a manejar dentro de la page y ya no es necesario el metodo handleChange a nivel de componente.
+
+Y los valores de los elementos del componente reciben el state de la page mediante props.
+
+```jsx
+<div className="form-group">
+            <label>First Name</label>
+            <input 
+              onChange={this.props.onChange} 
+              className="form-control" 
+              type="text" 
+              name="firstName"
+              value= {this.props.formValues.firstName}
+              />
+          </div>
+```
+
+# Listas de componentes.
+
+Para este caso vamos a crear una lista de Badges.
+
+Donde en props va a venir un arreglo de badges que se renderizara por medio de la función map.
+
+En este ejemplo se nota como se pueden crear componentes dentro de un mismo archivo siempre y cuando solo uno se exporte.
+
+```jsx
+import React, { Component } from 'react';
+
+import './styles/BadgesList.css'
+
+class BadgesListItem extends Component {
+  render(){
+    return(
+      <div className="BadgesListItem">
+        <img
+        className="BadgesListItem__avatar"
+        src={this.props.badge.avatarUrl}
+        alt={`${this.props.badge.firstName}
+        ${this.props.badge.lastName}`}
+        />
+
+        <div>
+          <strong>
+            {this.props.badge.firstName} {this.props.badge.lastName}
+          </strong>
+
+          <br/> @{this.props.badge.twitter}
+          <br/>
+          {this.props.badge.jobTitle}
+        </div>
+      </div>
+    )
+  }
+}
+
+
+export class BadgesList extends Component {
+  render() {
+    return (
+      <div className="BadgesList">
+        <ul className="list-unstyled">
+                {this.props.badges.map( (badge) => {
+                  return (
+                    <li key={badge.id}>
+                      <BadgesListItem badge={badge} />
+                    </li>
+                  )
+                })}
+              </ul>
+      </div>
+    );
+  }
+}
+
+export default BadgesList;
+
+```
+
