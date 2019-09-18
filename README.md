@@ -469,3 +469,33 @@ function Layout(props) {
 export default Layout
 ```
 
+# Ciclo de vida de los componentes.
+
+Cuando React renderiza los componentes decimos que entran en escena, cuando su estado cambia o recibe unos *props* diferentes se actualizan y cuando cambiamos de página se dice que se desmontan.
+
+**Montaje:**
+
+- Representa el momento donde se inserta el código del componente en el DOM.
+- Se llaman tres métodos: *constructor*, *render*, *componentDidMount*.
+
+**Actualización:**
+
+- Ocurre cuando los *props* o el estado del componente cambian.
+- Se llaman dos métodos: *render*, *componentDidUpdate*.
+
+**Desmontaje:**
+
+- Nos da la oportunidad de hacer limpieza de nuestro componente.
+- Se llama un método: *componentWillUnmount*.
+
+
+  ![img](https://maksimivanov.com/static/2ffa2b4eab0cfc3c8f74d76657f7b3ec/c4fa1/lifecycle.png)
+
+# Introducción llamadas a un API
+
+Las llamadas a una API siguen un patrón similar siempre que las hacemos, cada llamada consta de tres estados:
+
+- **Loading**: cuando la petición se envía y estamos esperando.
+- **Error**: se debe dejar un mensaje para el usuario para arreglar el error o volver a intentarlo.
+- **Data**: los datos nos pueden llegar de dos formas, o en error o con los datos requeridos.
+
