@@ -379,3 +379,93 @@ export default BadgesList;
 
 ```
 
+# División de la aplicación en rutas.
+
+Para esta tarea se ocupa React-router-dom.
+
+```
+npm install react-router-dom
+```
+
+Para realizar la funcion de app principal vamos a crear un componente que se llame App dentro de el vamos a ocupar el Router para utilizarlo como templete para la paginación. 
+
+Este es un **componente funcional**, estos son identificados por que son componentes que solo se encargan de renderizar y no cuentan con metodos o state y solo tienen un argumento en este caso las props.
+
+Cabe resaltar que el **BrowserRouter** solo debe tener un Hijo por lo cual se agrega dentro de el un **Switch** (el cual va a retornar una ruta, la primera que coincida con lo que se esta buscando en el path), es por eso que se agrega la bandera **exact** dentro del **Router** por que si buscamos **badges/ruta** siempre va a retornarnos **/badges** ya que es la primera que coinsidira con la ruta buscada. 
+
+```jsx
+import React from 'react'
+import { BrowserRouter, Switch, Route } from 'react-router-dom'
+
+import Badges from '../pages/Badges'
+import BadgeNew from '../pages/BadgeNew'
+
+function App() {
+  return (
+    <BrowserRouter>
+        <Switch>
+          <Route exact path="/badges" component={Badges} />
+          <Route exact path="/badges/new" component={BadgeNew} />
+        </Switch>
+    </BrowserRouter>
+  );
+}
+
+export default App
+```
+
+## LINKS
+
+En este momento nuestra page badges cuenta con un ancla <a> la cual debe ser cambiada por un <Link> </Link> esto es para hacer mas rapida la respuesta, ya que se esta ocupando React-router la navegación va a ser interna y no se recargara toda la pagina. 
+
+Cada vez que tengamos que poner un ancla hacia nuestras pages usaremos el Link.
+
+```jsx
+<div className="Badges__buttons">
+            <Link to="/badges/new" className="btn btn-primary"> 
+            New Badge
+            </Link>
+</div>
+```
+
+# User interface con un Layout.
+
+Se implementa un componente con nombre Layout que va a ser principalmente usado como contenedor de las pages. Y este va a estar conteniendo el Switch con las rutas de las pages e ira dentro del BrowserRouter.
+
+```jsx
+function App() {
+  return (
+    <BrowserRouter>
+      <Layout>
+        <Switch>
+          <Route exact path="/badges" component={Badges} />
+          <Route exact path="/badges/new" component={BadgeNew} />
+          <Route component={NotFound}/>
+        </Switch>
+      </Layout>
+    </BrowserRouter>
+  );
+}
+```
+
+Se ocupara React.Fragment que es una herramienta que ayuda a renderizar varios componentes y/o elementos sin necesidad de colocar un div para renderizar sus hijos. Es como un Template dentro de Vue. 
+
+Los elementos que estan dentro de Layout son identificados por el propio **children** y estos van integrados como unico argumento dentro de los **componentes funcionales**.
+
+```jsx
+import React from 'react'
+import NavBar from '../components/Navbar'
+
+function Layout(props) {
+  
+  return (
+    <React.Fragment>
+      <NavBar/>
+      {props.children}
+    </React.Fragment>
+  )
+}
+
+export default Layout
+```
+

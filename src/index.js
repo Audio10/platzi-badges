@@ -7,12 +7,9 @@ import 'bootstrap/dist/css/bootstrap.css'
 import './global.css'
 
 // COMPONENTES
-// import BagdeNew from './pages/BadgeNew'
-import Badges from './pages/Badges';
+import App from './components/App';
 
 const container = document.getElementById('app')
 
 ReactDom.render(
-<Badges 
-    
-/>, container)
+<App/>, container)
