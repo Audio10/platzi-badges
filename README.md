@@ -499,3 +499,17 @@ Las llamadas a una API siguen un patrón similar siempre que las hacemos, cada l
 - **Error**: se debe dejar un mensaje para el usuario para arreglar el error o volver a intentarlo.
 - **Data**: los datos nos pueden llegar de dos formas, o en error o con los datos requeridos.
 
+# Consulta a API.
+
+Cuando consultamos un api la page encargada de guardar el state debe inicializarse con los atributos de loading, error y data.
+
+```jsx
+this.setState({
+        loading: true,
+        error: null,
+        data: undefined
+      })
+```
+
+El mejor momento para llamar una api es en el componenteDidMount que de esa forma estamos seguros que nuestros datos estan listos para recibir la consulta.
+
