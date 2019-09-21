@@ -501,7 +501,7 @@ Las llamadas a una API siguen un patrón similar siempre que las hacemos, cada l
 
 # Consulta a API.
 
-Cuando consultamos un api la page encargada de guardar el state debe inicializarse con los atributos de loading, error y data.
+Cuando consultamos un api la page encargada de guardar el state debe inicializarse con los atributos de **loading**, **error** y **data**.
 
 ```jsx
 this.setState({
@@ -509,7 +509,265 @@ this.setState({
         error: null,
         data: undefined
       })
+
+ componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData = async () => {
+    // Reasignamos el estado por si ya se consulto y cambio, asegurandonos que siempre que se inicie una consulta este en este estado.
+    this.setState({ loading: true, error: null });
+
+    try {
+      // Hacemos la consulta a la api si esta es correcta el loading y data deben cambiar su estado.
+      const data = await api.badges.list();
+      this.setState({ loading: false, data: data });
+    } catch (error) {
+      // Pero si produce un error se debe enviar el error causado para poder dar respuesta al usuario.
+      this.setState({ loading: false, error: error });
+    }
+  };
 ```
 
-El mejor momento para llamar una api es en el componenteDidMount que de esa forma estamos seguros que nuestros datos estan listos para recibir la consulta.
+El mejor momento para llamar una api es en el componenteDidMount que de esa forma estamos seguros que nuestros datos estan listos para recibir la consulta, es decir que ya esta cargado en el DOM.
 
+En este momento esto se representa por medio del método **fetchData** donde nos encargamos de modificar el state del componente para poder una mejor UI.
+
+Después dentro del render nos encargaremos de representar los diferentes estados que va a tener la pagina. Si esta cargando o si se produjo un Error.
+
+```
+if (this.state.loading === true) {
+      return <PageLoading />
+    }
+
+    if (this.state.error) {
+      return <PageError error={this.state.error } />
+    }
+```
+
+Agregamos de igual forma para mejorar la UI en la lista de badges una condición para verificar si hay badges o no. Si no hay badges se creara un anuncio y se generara un botón para crear el primer badge.
+
+```
+if (this.props.badges.length === 0) {
+      return (
+        <div>
+          <h3> No badges were found</h3>
+          <Link className="btn btn-primary" to="/badges/new">
+            Create new badge
+          </Link>
+        </div>
+      )
+    }
+```
+
+# Mejorando la Experiencia de Usuario durante una petición
+
+Se creo un loader para demostrar que esta cargando la petición y también se agrega un componente para manejar el error y mejorar la UI.
+
+
+
+# Enviando datos (POST)
+
+**MD5** es una pequeña librería a la cual se le da un texto y ella regresa un **hash**.
+
+Podremos hacer pruebas para cifrar nuestros textos a md5 en el siguiente sitio [MD5 Online](https://md5online.es/cifrar-md5)
+
+Hola Platzi = d3bfb9302fb1007c0f996b41cba2818c
+
+## Implementación de componente Gravatar
+
+Gravatar es una api que funciona mediante el email que es cifrado con MD5 por lo tanto cuando ocuparemos el email como una prop de gravatar para hacer el hash y poder encontrarlo dentro de la api.
+
+**gravatar.js**
+
+```jsx
+import React from "react";
+import md5 from "md5";
+
+
+
+// Aprende más del Gravatar en: http://gravatar.com
+function Gravatar(props) {
+  const hash = md5(props.email);
+
+  return (
+    <img
+      className={props.className}
+      src={`https://www.gravatar.com/avatar/${hash}?d=identicon`}
+      alt="Avatar"
+    />
+  );
+}
+
+export default Gravatar;
+```
+
+**badge.js**
+
+```jsx
+// import Gravatar from './Gravatar'
+
+<div className="Badge__section-name">
+          <Gravatar
+            className="Badge_avatar"
+            email={this.props.email}
+            alt="Avatar"
+          />
+          <h1>{this.props.firstName} <br/> {this.props.lastName}</h1>
+        </div>
+```
+
+**badgesList.js** 
+
+```jsx
+import Gravatar from "./Gravatar";
+{ <img
+        className="BadgesListItem__avatar"
+        src={this.props.badge.avatarUrl}
+        alt={`${this.props.badge.firstName}
+        ${this.props.badge.lastName}`}
+        /> } 
+```
+
+## Implementación de gravatar sin componente
+
+Primero se debe agregar la dependencia de **react-gravatar**
+
+```
+npm install --save react-gravatar
+```
+
+**badge**
+
+Dentro del badge se cambiara el componente Gravatar por la implementación de react-gravatar que ya esta configurada para ser usada con el EMAIL.
+
+```
+import Gravatar from "react-gravatar";
+
+		 <Gravatar
+            className="Badge_avatar"
+            email={this.props.email}
+            alt="Avatar"
+          />
+```
+
+**badgesList**
+
+```jsx
+import Gravatar from "react-gravatar";
+
+<Gravatar
+          className="BadgesListItem__avatar"
+          email={this.props.badge.email}
+          alt={`${this.props.badge.firstName}
+          ${this.props.badge.lastName}`}
+        />
+```
+
+# Manejando los estados de la petición durante el POST
+
+De la misma manera en la que se manejan los estados cuando se solicitan datos, deben ser manejados cuando los datos son enviados.
+
+Existe un tiempo entre que se da clic y los datos son enviados. Ese tiempo de espera es necesario visualizarlo. Igual hay que mostrar mensajes de error cuando no funcionan las cosas.
+
+Básicamente lo que aremos es agregar el estado de carga y error. Cuando cargue aparecerá el PageLoading, mientras que el error se va a mandar por medio de las props al formulario para que este sea el encargado de notificar el error.
+
+Se ocupa la propiedad **history.push()** para redireccionar a la pagina anterior es decir badges. 
+
+```jsx
+ state = {
+    loading : false,
+    error: null,
+    form: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      twitter: "",
+      jobTitle: "",
+    }
+  }
+  
+  handleSubmit = async e => {
+    // Funciona para detener una llamada
+    e.preventDefault()
+    this.setState( {loading: true, error: null })
+
+    try {
+      await api.badges.create(this.state.form)
+      this.setState( {loading: false})
+
+      this.props.history.push('/badges')
+    } catch (error) {
+      this.setState( {loading: false, error: error })
+    }
+  }
+  
+  render() {
+    if (this.state.loading) {
+      return <PageLoading />;
+    }
+      
+       <div className="col-6">
+              <BadgeForm 
+              onChange={this.handleChange}
+              onSubmit={this.handleSubmit} 
+              formValues={this.state.form}
+              error={this.state.error}  
+              />
+        </div>
+  }
+```
+
+**badgesForm**
+
+El operador && simplifica un **entonces**, por lo cual si existe un error entonces imprimiremos el mensaje.
+
+```
+{this.props.error && (
+            <p className="text-danger"> {this.props.error.message} </p>
+          )}
+```
+
+# Actualizando datos (PUT)
+
+# UI Components y Container Components
+
+En la programación es bueno separar las tareas en diferentes funciones y en React sucede lo mismo. Cuando un componente hace demasiado, probablemente es mejor dividirlo en dos.
+
+Esta técnica de componentes presentacionales y componentes *container* es común, útil y hace parte de las buenas prácticas.
+
+Los presentacionales solo tienen la vista, mientras que los container tienen state y manejan la logica, enviando el estado como prop hacia el presentacional.
+
+**Los presentacionales son funciones cuyo unico parametro son las props.**
+
+```jsx
+function BadgeDetails(props) {
+
+}
+```
+
+# Portales
+
+Hay momentos en los que queremos renderizar un modal, un *tooltip*, etc. Esto puede volverse algo complicado ya sea por la presencia de un *z-index* o un *overflow hidden*.
+
+En estos casos lo ideal será renderizar en un nodo completamente aparte y para esto React tiene una herramienta llamada **Portales** que funcionan parecido a ReactDOM.render; se les dice qué se desea renderizar y dónde, con la diferencia de que ese dónde puede ser fuera de la aplicación.
+
+# Modales
+
+La técnica de usar componentes genéricos para crear uno nuevo especializado se llama **composición** y es una herramienta que todo buen programador debe saber utilizar.
+
+# Hooks
+
+Las funciones no tienen un estado propio que manejar como ciclos de vida a los que deben suscribirse, mientras tanto las clases sí cuentan con ello.
+
+React tiene un feature llamado **Hooks** que permite que las funciones también tengan *features* que solamente tienen las clases.
+
+**Hooks:** Permiten a los componentes funcionales tener características que solo las clases tienen:
+
+- **useState:** Para manejo de estado.
+- **useEffect:** Para suscribir el componente a su ciclo de vida.
+- **useReducer:** Ejecutar un efecto basado en una acción.
+
+**Custom Hooks:** Usamos los *hooks* fundamentales para crear nuevos *hooks custom*. Estos *hooks* irán en su propia función y su nombre comenzará con la palabra *use*. Otra de sus características es que no pueden ser ejecutados condicionalmente (*if*).
+
+- *useState* regresa un arreglo de dos argumentos.

@@ -7,8 +7,9 @@ import logo from "../images/badge-header.svg";
 
 // COMPONENTES
 import BadgesList from "../components/BadgesList";
-import PageLoading from "../components/PageLoading"
-
+import PageLoading from "../components/PageLoading";
+import PageError from "../components/PageError";
+import MiniLoader from "../components/MiniLoader";
 import api from "../api";
 
 export class Badges extends Component {
@@ -20,6 +21,12 @@ export class Badges extends Component {
 
   componentDidMount() {
     this.fetchData();
+
+    this.intervalId = setInterval(this.fetchData, 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalId);
   }
 
   fetchData = async () => {
@@ -34,12 +41,12 @@ export class Badges extends Component {
   };
 
   render() {
-    if (this.state.loading === true) {
-      return <PageLoading />
+    if (this.state.loading === true && !this.state.data) {
+      return <PageLoading />;
     }
 
     if (this.state.error) {
-      return `Error: ${this.state.error.message}`;
+      return <PageError error={this.state.error} />;
     }
 
     return (
@@ -47,7 +54,7 @@ export class Badges extends Component {
         <div className="Badges">
           <div className="Badges__hero">
             <div className="Badges__container">
-              <img className="Badges__conf-logo" src={logo} alt="ConfLogo" />
+              <img className="Badges__conf-logo" src={logo} alt="ConfLogo" />
             </div>
           </div>
         </div>
@@ -62,6 +69,7 @@ export class Badges extends Component {
           <div className="Badges__list">
             <div className="Badges__container">
               <BadgesList badges={this.state.data} />
+              {this.state.loading && <MiniLoader />}
             </div>
           </div>
         </div>
